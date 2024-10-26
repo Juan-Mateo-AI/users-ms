@@ -1,5 +1,4 @@
-version: '3'
-
+version: "3"
 
 services:
   users-db:
@@ -14,4 +13,3 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123456
       - POSTGRES_DB=usersdb
-

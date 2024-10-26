@@ -43,11 +43,12 @@ model UserRole {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  companyId String @unique
-  company  Company  @relation(fields: [companyId], references: [id])
+  companyId String? @unique
+  company  Company?  @relation(fields: [companyId], references: [id])
 
-  userId String @unique
-  user  User  @relation(fields: [userId], references: [id])
+  users User[]
+
+  isAdmin Boolean @default(false)
 }
 
 
@@ -63,5 +64,6 @@ model User {
   companyId String @unique
   company  Company  @relation(fields: [companyId], references: [id])
 
-  userRole UserRole?
+  userRoleId String @unique
+  userRole  UserRole  @relation(fields: [userRoleId], references: [id])
 }
