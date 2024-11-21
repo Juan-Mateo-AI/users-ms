@@ -1,20 +1,12 @@
-import {
-  HttpStatus,
-  Inject,
-  Injectable,
-  Logger,
-  OnModuleInit,
-} from '@nestjs/common';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { PrismaClient } from '@prisma/client';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { PaidOrderDto } from './dto';
-import { NATS_SERVICE, PRODUCT_SERVICE } from 'src/config';
-import { firstValueFrom, throwError } from 'rxjs';
+import { Inject, Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import { PrismaClient } from "@prisma/client";
+import { ClientProxy, RpcException } from "@nestjs/microservices";
+import { PaidOrderDto, UserToCreateDto } from "./dto";
+import { NATS_SERVICE } from "src/config";
 
 @Injectable()
 export class UsersService extends PrismaClient implements OnModuleInit {
-  private readonly logger = new Logger('UsersService');
+  private readonly logger = new Logger("UsersService");
 
   constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {
     super();
@@ -22,14 +14,48 @@ export class UsersService extends PrismaClient implements OnModuleInit {
 
   async onModuleInit() {
     await this.$connect();
-    this.logger.log('Database connected');
+    this.logger.log("Database connected");
   }
 
-  async create(createOrderDto: CreateOrderDto) {}
+  async create(userToCreate: UserToCreateDto) {
+    const userRole = this.userRole.findFirst({
+      where: { companyId: userToCreate.companyId },
+    });
+
+    if (!userRole) {
+      throw new RpcException({
+        status: 400,
+        message: "Invalid User Role provided",
+      });
+    }
+
+    return this.user.create({
+      data: userToCreate,
+    });
+  }
 
   async findAll(orderPaginationDto) {}
 
-  async findOne(id: string) {}
+  async findOne(email: string) {
+    if (!email) {
+      throw new RpcException({
+        status: 400,
+        message: "Email cannot be null",
+      });
+    }
+
+    return this.user.findFirst({
+      where: { email },
+      include: {
+        company: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+  }
 
   async changeStatus(changeOrderStatusDto) {}
 

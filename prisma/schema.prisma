@@ -61,9 +61,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  companyId String @unique
+  companyId String 
   company  Company  @relation(fields: [companyId], references: [id])
 
-  userRoleId String @unique
+  userRoleId String 
   userRole  UserRole  @relation(fields: [userRoleId], references: [id])
 }
