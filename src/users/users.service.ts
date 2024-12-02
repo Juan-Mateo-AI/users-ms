@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { PrismaClient } from "@prisma/client";
 import { ClientProxy, RpcException } from "@nestjs/microservices";
-import { PaidOrderDto, UserToCreateDto } from "./dto";
+import { UpdateUserDto, UserToCreateDto } from "./dto";
 import { NATS_SERVICE } from "src/config";
 
 @Injectable()
@@ -34,8 +34,22 @@ export class UsersService extends PrismaClient implements OnModuleInit {
     });
   }
 
-  async findAll(orderPaginationDto) {}
+  async update(user: UpdateUserDto) {
+    const userRole = this.userRole.findFirst({
+      where: { companyId: userToCreate.companyId },
+    });
 
+    if (!userRole) {
+      throw new RpcException({
+        status: 400,
+        message: "Invalid User Role provided",
+      });
+    }
+
+    return this.user.create({
+      data: userToCreate,
+    });
+  }
   async findOne(email: string) {
     if (!email) {
       throw new RpcException({
@@ -53,11 +67,42 @@ export class UsersService extends PrismaClient implements OnModuleInit {
             name: true,
           },
         },
+        userRole: {
+          select: {
+            id: true,
+            name: true,
+            isAdmin: true,
+          },
+        },
       },
     });
   }
 
-  async changeStatus(changeOrderStatusDto) {}
+  async findOneById(id: string) {
+    if (!id) {
+      throw new RpcException({
+        status: 400,
+        message: "Id cannot be null",
+      });
+    }
 
-  async paidOrder(paidOrderDto: PaidOrderDto) {}
+    return this.user.findFirst({
+      where: { id },
+      include: {
+        company: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        userRole: {
+          select: {
+            id: true,
+            name: true,
+            isAdmin: true,
+          },
+        },
+      },
+    });
+  }
 }
