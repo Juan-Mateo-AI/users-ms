@@ -1,7 +1,7 @@
 import { Body, Controller, ParseUUIDPipe } from "@nestjs/common";
 import { MessagePattern, Payload } from "@nestjs/microservices";
 import { UsersService } from "./users.service";
-import { EmailDto, UpdateUserDto, UserToCreateDto } from "./dto";
+import { CompanyIdDto, EmailDto, UpdateUserDto, UserToCreateDto } from "./dto";
 import { IdDto } from "./dto/id";
 import { UpdateUserControllerDto } from "./dto/update-user-controller.dto";
 
@@ -29,5 +29,10 @@ export class UsersController {
   @MessagePattern("users.findOneById")
   findOneById(@Payload() { id }: IdDto) {
     return this.usersService.findOneById(id);
+  }
+
+  @MessagePattern("users.findAllByCompanyId")
+  findAllByCompanyId(@Payload() { companyId, page, pageSize }: CompanyIdDto) {
+    return this.usersService.findAllByCompanyId(companyId, page, pageSize);
   }
 }

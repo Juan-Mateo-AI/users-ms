@@ -84,7 +84,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
     ) {
       return this.user.update({
         where: { id: userId },
-        data: { ...userToUpdate, companyId: undefined },
+        data: { ...userToUpdate, companyId: undefined, email: undefined },
       });
     } else {
       throw new RpcException({
@@ -147,6 +147,36 @@ export class UsersService extends PrismaClient implements OnModuleInit {
           },
         },
       },
+    });
+  }
+
+  async findAllByCompanyId(companyId: string, page: number, pageSize: number) {
+    if (!companyId) {
+      throw new RpcException({
+        status: 400,
+        message: "companyId cannot be null",
+      });
+    }
+
+    return this.user.findMany({
+      where: { companyId },
+      include: {
+        company: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        userRole: {
+          select: {
+            id: true,
+            name: true,
+            isAdmin: true,
+          },
+        },
+      },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
     });
   }
 }

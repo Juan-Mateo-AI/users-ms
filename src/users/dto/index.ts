@@ -5,3 +5,4 @@ export * from "./update-order.dto";
 export * from "./user-to-create";
 export * from "./email";
 export * from "./update-user.dto";
+export * from "./get-all-users.dto";
