@@ -1,7 +1,13 @@
-import { Body, Controller, ParseUUIDPipe } from "@nestjs/common";
+import { Body, Controller } from "@nestjs/common";
 import { MessagePattern, Payload } from "@nestjs/microservices";
 import { UsersService } from "./users.service";
-import { CompanyIdDto, EmailDto, UpdateUserDto, UserToCreateDto } from "./dto";
+import {
+  DeleteUserDto,
+  EmailDto,
+  GetAllUsersDto,
+  UpdateUserDto,
+  UserToCreateDto,
+} from "./dto";
 import { IdDto } from "./dto/id";
 import { UpdateUserControllerDto } from "./dto/update-user-controller.dto";
 
@@ -32,7 +38,12 @@ export class UsersController {
   }
 
   @MessagePattern("users.findAllByCompanyId")
-  findAllByCompanyId(@Payload() { companyId, page, pageSize }: CompanyIdDto) {
+  findAllByCompanyId(@Payload() { companyId, page, pageSize }: GetAllUsersDto) {
     return this.usersService.findAllByCompanyId(companyId, page, pageSize);
+  }
+
+  @MessagePattern("users.delete")
+  deleteUser(@Payload() { companyId, userId }: DeleteUserDto) {
+    return this.usersService.deleteUser(companyId, userId);
   }
 }

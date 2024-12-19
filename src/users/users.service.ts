@@ -179,4 +179,19 @@ export class UsersService extends PrismaClient implements OnModuleInit {
       take: pageSize,
     });
   }
+
+  async deleteUser(companyId: string, userId: string) {
+    if (!companyId) {
+      throw new RpcException({
+        status: 400,
+        message: "companyId cannot be null",
+      });
+    }
+
+    return this.user.delete({
+      where: {
+        id: userId,
+      },
+    });
+  }
 }

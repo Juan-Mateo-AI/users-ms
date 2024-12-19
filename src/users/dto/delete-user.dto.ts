@@ -1,15 +1,11 @@
 import { IsDefined, IsNumber, IsUUID } from "class-validator";
 
-export class GetAllUsersDto {
+export class DeleteUserDto {
   @IsDefined()
   @IsUUID()
   companyId: string;
 
   @IsDefined()
-  @IsNumber()
-  page: number;
-
-  @IsDefined()
-  @IsNumber()
-  pageSize: number;
+  @IsUUID()
+  userId: string;
 }
