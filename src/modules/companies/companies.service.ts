@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import { HttpStatus, Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { PrismaClient } from "@prisma/client";
 import { RpcException } from "@nestjs/microservices";
 import { CurrentUser } from "./interfaces";
@@ -28,7 +28,7 @@ export class CompaniesService extends PrismaClient implements OnModuleInit {
 
     if (!currentCompanyToUpdate) {
       throw new RpcException({
-        status: 400,
+        status: HttpStatus.UNAUTHORIZED,
         message: "Company not found",
       });
     }
@@ -49,7 +49,7 @@ export class CompaniesService extends PrismaClient implements OnModuleInit {
       });
     } else {
       throw new RpcException({
-        status: 403,
+        status: HttpStatus.UNAUTHORIZED,
         message: "Unauthorized",
       });
     }
@@ -58,7 +58,7 @@ export class CompaniesService extends PrismaClient implements OnModuleInit {
   async findOneById(id: string) {
     if (!id) {
       throw new RpcException({
-        status: 400,
+        status: HttpStatus.BAD_REQUEST,
         message: "Id cannot be null",
       });
     }

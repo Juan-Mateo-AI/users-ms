@@ -1,10 +1,15 @@
-import { Inject, Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import {
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleInit,
+} from "@nestjs/common";
 import { PrismaClient } from "@prisma/client";
 import { ClientProxy, RpcException } from "@nestjs/microservices";
 import { UpdateUserDto, UserToCreateDto } from "./dto";
 import { NATS_SERVICE } from "src/config";
 import { CurrentUser } from "./interfaces";
-import { catchError } from "rxjs";
 
 @Injectable()
 export class UsersService extends PrismaClient implements OnModuleInit {
@@ -29,7 +34,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
 
     if (!userRole) {
       throw new RpcException({
-        status: 400,
+        status: HttpStatus.BAD_REQUEST,
         message: "User role does not exists",
       });
     }
@@ -40,7 +45,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
 
     if (existingUser) {
       throw new RpcException({
-        status: 409,
+        status: HttpStatus.CONFLICT,
         message: "Email address already in use",
       });
     }
@@ -61,7 +66,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
 
     if (!currentUserToUpdate) {
       throw new RpcException({
-        status: 400,
+        status: HttpStatus.BAD_REQUEST,
         message: "User not found",
       });
     }
@@ -72,7 +77,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
 
     if (!userRole) {
       throw new RpcException({
-        status: 400,
+        status: HttpStatus.BAD_REQUEST,
         message: "Invalid User Role provided",
       });
     }
@@ -88,7 +93,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
       });
     } else {
       throw new RpcException({
-        status: 403,
+        status: HttpStatus.FORBIDDEN,
         message: "Unauthorized",
       });
     }
@@ -97,7 +102,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
   async findOne(email: string) {
     if (!email) {
       throw new RpcException({
-        status: 400,
+        status: HttpStatus.BAD_REQUEST,
         message: "Email cannot be null",
       });
     }
@@ -125,7 +130,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
   async findOneById(id: string) {
     if (!id) {
       throw new RpcException({
-        status: 400,
+        status: HttpStatus.BAD_REQUEST,
         message: "Id cannot be null",
       });
     }
@@ -153,7 +158,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
   async findAllByCompanyId(companyId: string, page: number, pageSize: number) {
     if (!companyId) {
       throw new RpcException({
-        status: 400,
+        status: HttpStatus.BAD_REQUEST,
         message: "companyId cannot be null",
       });
     }
@@ -183,7 +188,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
   async deleteUser(companyId: string, userId: string) {
     if (!companyId) {
       throw new RpcException({
-        status: 400,
+        status: HttpStatus.BAD_REQUEST,
         message: "companyId cannot be null",
       });
     }

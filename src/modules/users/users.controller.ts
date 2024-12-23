@@ -5,7 +5,6 @@ import {
   DeleteUserDto,
   EmailDto,
   GetAllUsersDto,
-  UpdateUserDto,
   UserToCreateDto,
 } from "./dto";
 import { IdDto } from "./dto/id";

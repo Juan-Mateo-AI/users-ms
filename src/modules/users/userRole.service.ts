@@ -1,4 +1,10 @@
-import { Inject, Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import {
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleInit,
+} from "@nestjs/common";
 import { PrismaClient } from "@prisma/client";
 import { ClientProxy, RpcException } from "@nestjs/microservices";
 import { UpdateUserDto, UserToCreateDto } from "./dto";
@@ -19,7 +25,7 @@ export class UserRoleService extends PrismaClient implements OnModuleInit {
   async findOne(id: string) {
     if (!id) {
       throw new RpcException({
-        status: 400,
+        status: HttpStatus.BAD_REQUEST,
         message: "Id cannot be null",
       });
     }
