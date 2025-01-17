@@ -163,26 +163,33 @@ export class UsersService extends PrismaClient implements OnModuleInit {
       });
     }
 
-    return this.user.findMany({
-      where: { companyId },
-      include: {
-        company: {
-          select: {
-            id: true,
-            name: true,
+    const [users, count] = await Promise.all([
+      this.user.findMany({
+        where: { companyId },
+        include: {
+          company: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          userRole: {
+            select: {
+              id: true,
+              name: true,
+              isAdmin: true,
+            },
           },
         },
-        userRole: {
-          select: {
-            id: true,
-            name: true,
-            isAdmin: true,
-          },
-        },
-      },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-    });
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.user.count({
+        where: { companyId },
+      }),
+    ]);
+
+    return { users, count };
   }
 
   async deleteUser(companyId: string, userId: string) {
