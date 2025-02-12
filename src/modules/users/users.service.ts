@@ -7,15 +7,21 @@ import {
 } from "@nestjs/common";
 import { PrismaClient } from "@prisma/client";
 import { ClientProxy, RpcException } from "@nestjs/microservices";
-import { UpdateUserDto, UserToCreateDto } from "./dto";
+import { UpdateUserDto, UserToCreateDto, InviteUserDto } from "./dto";
 import { NATS_SERVICE } from "src/config";
 import { CurrentUser } from "./interfaces";
+import { MailService } from "../mail/mail.service";
+import { TokensService } from "../tokens/tokens.service";
 
 @Injectable()
 export class UsersService extends PrismaClient implements OnModuleInit {
   private readonly logger = new Logger("UsersService");
 
-  constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {
+  constructor(
+    private readonly mailService: MailService,
+    private readonly tokenService: TokensService,
+    @Inject(NATS_SERVICE) private readonly client: ClientProxy
+  ) {
     super();
   }
 
@@ -205,5 +211,43 @@ export class UsersService extends PrismaClient implements OnModuleInit {
         id: userId,
       },
     });
+  }
+
+  async inviteUser(currentUser: CurrentUser, userToInvite: InviteUserDto) {
+    const existingUser = await this.user.findUnique({
+      where: { email: userToInvite.email },
+    });
+
+    if (existingUser) {
+      throw new RpcException({
+        status: HttpStatus.CONFLICT,
+        message: "Email address already in use",
+      });
+    }
+
+    const agentUserRole = await this.userRole.findFirst({
+      where: {
+        name: "Agent",
+        companyId: null,
+      },
+    });
+
+    const user = await this.user.create({
+      data: {
+        ...userToInvite,
+        userRoleId: agentUserRole.id,
+        companyId: currentUser.companyId,
+        active: false,
+      } as any,
+    });
+
+    const invitationToken = await this.tokenService.generateUserInviteToken(
+      user.id
+    );
+
+    return this.mailService.sendInvitationEmail(
+      user,
+      invitationToken.identifier
+    );
   }
 }

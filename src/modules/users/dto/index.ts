@@ -7,3 +7,4 @@ export * from "./email";
 export * from "./update-user.dto";
 export * from "./get-all-users.dto";
 export * from "./delete-user.dto";
+export * from "./invite-user.dto";

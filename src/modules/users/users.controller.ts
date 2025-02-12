@@ -45,4 +45,9 @@ export class UsersController {
   deleteUser(@Payload() { companyId, userId }: DeleteUserDto) {
     return this.usersService.deleteUser(companyId, userId);
   }
+
+  @MessagePattern("users.invite")
+  sendEmail(@Payload() { currentUser, userToInvite }) {
+    return this.usersService.inviteUser(currentUser, userToInvite);
+  }
 }

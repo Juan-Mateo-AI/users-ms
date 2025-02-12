@@ -58,6 +58,7 @@ model User {
   email String @unique
   name String
   active Boolean @default(true) 
+  acceptedInvitation Boolean @default(false) 
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -67,4 +68,16 @@ model User {
 
   userRoleId String 
   userRole  UserRole  @relation(fields: [userRoleId], references: [id])
+}
+
+
+model Token {
+  id String @id @default(uuid())
+  type String
+  identifier String @default(uuid())
+  entityName String
+  entityId String
+  expiredAt DateTime @default(dbgenerated("now() + interval '48 hours'"))
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
