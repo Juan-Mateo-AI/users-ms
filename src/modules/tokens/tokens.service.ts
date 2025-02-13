@@ -32,6 +32,16 @@ export class TokensService extends PrismaClient implements OnModuleInit {
     });
   }
 
+  async generateForgotPasswordToken(userId: string) {
+    return this.token.create({
+      data: {
+        type: "forgotPassword",
+        entityName: "user",
+        entityId: userId,
+      },
+    });
+  }
+
   async validateToken({ type, token }) {
     const tokenData = await this.token.findFirst({
       where: {
@@ -95,6 +105,37 @@ export class TokensService extends PrismaClient implements OnModuleInit {
       select: {
         email: true,
         name: true,
+      },
+    });
+  }
+
+  async expireForgotPasswordTokenAndGetUser(token) {
+    const tokenData = await this.token.findFirst({
+      where: {
+        identifier: token,
+        type: "forgotPassword",
+      },
+    });
+
+    if (!tokenData) {
+      throw new RpcException({
+        status: HttpStatus.NOT_FOUND,
+        message: "Token not found",
+      });
+    }
+
+    await this.token.update({
+      where: {
+        id: tokenData.id,
+      },
+      data: {
+        expiredAt: new Date(),
+      },
+    });
+
+    return this.user.findFirst({
+      where: {
+        id: tokenData.entityId,
       },
     });
   }

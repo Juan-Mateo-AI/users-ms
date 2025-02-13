@@ -12,6 +12,8 @@ import { NATS_SERVICE } from "src/config";
 import { CurrentUser } from "./interfaces";
 import { MailService } from "../mail/mail.service";
 import { TokensService } from "../tokens/tokens.service";
+import { catchError } from "rxjs";
+import { firstValueFrom } from "rxjs";
 
 @Injectable()
 export class UsersService extends PrismaClient implements OnModuleInit {
@@ -249,5 +251,51 @@ export class UsersService extends PrismaClient implements OnModuleInit {
       user,
       invitationToken.identifier
     );
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.user.findFirst({
+      where: { email },
+    });
+
+    const authUser = await firstValueFrom(
+      this.client
+        .send('auth.get.user', {
+          email,
+        })
+        .pipe(
+          catchError((error) => {
+            throw new RpcException(error);
+          }),
+        ),
+    );
+    
+    if (user && authUser) {
+      const forgotPasswordToken = await this.tokenService.generateForgotPasswordToken(
+        user.id
+      );
+
+      return this.mailService.sendForgotPasswordEmail(user, forgotPasswordToken.identifier);
+    }
+
+    throw new RpcException({
+      status: HttpStatus.NOT_FOUND,
+      message: "User not found",
+    });
+  }
+
+  async resetPassword(token: string, password: string) {
+    try {
+      const user = await this.tokenService.expireForgotPasswordTokenAndGetUser(token);
+
+      return firstValueFrom(
+        this.client.send("auth.user.forgotPassword", {
+          email: user.email,
+          password,
+        })
+      );
+    } catch (error) {
+      throw new RpcException(error);
+    }
   }
 }

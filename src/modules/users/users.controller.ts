@@ -4,7 +4,9 @@ import { UsersService } from "./users.service";
 import {
   DeleteUserDto,
   EmailDto,
+  ForgotPasswordDto,
   GetAllUsersDto,
+  ResetPasswordDto,
   UserToCreateDto,
 } from "./dto";
 import { IdDto } from "./dto/id";
@@ -49,5 +51,15 @@ export class UsersController {
   @MessagePattern("users.invite")
   sendEmail(@Payload() { currentUser, userToInvite }) {
     return this.usersService.inviteUser(currentUser, userToInvite);
+  }
+
+  @MessagePattern("users.forgotPassword")
+  forgotPassword(@Payload() { email }: ForgotPasswordDto) {
+    return this.usersService.forgotPassword(email);
+  }
+
+  @MessagePattern("users.resetPassword")
+  resetPassword(@Payload() { token, password }: ResetPasswordDto) {
+    return this.usersService.resetPassword(token, password);
   }
 }
